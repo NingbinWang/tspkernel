@@ -426,11 +426,11 @@ struct v4l2_fract {
   * @reserved:	   reserved fields for future extensions
   */
 struct v4l2_capability {
-	__u8	driver[16];
-	__u8	card[32];
+	__u8	driver[16]; //驱动名
+	__u8	card[32];//
 	__u8	bus_info[32];
 	__u32   version;
-	__u32	capabilities;
+	__u32	capabilities;//能力集
 	__u32	device_caps;
 	__u32	reserved[3];
 };

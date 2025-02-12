@@ -54,6 +54,8 @@
 #include "dwmac1000.h"
 #include "dwxgmac2.h"
 #include "hwif.h"
+#include "dwmac-rk-tool.h"
+
 
 #define	STMMAC_ALIGN(x)		ALIGN(ALIGN(x, SMP_CACHE_BYTES), 16)
 #define	TSO_MAX_BUFF_SIZE	(SZ_16K - 1)
@@ -2690,6 +2692,12 @@ static int stmmac_open(struct net_device *dev)
 
 	stmmac_enable_all_queues(priv);
 	netif_tx_start_all_queues(priv->dev);
+	#ifdef CONFIG_DWMAC_RK_AUTO_DELAYLINE
+		if (!priv->delayline_scanned) {
+			priv->delayline_scanned = true;
+			schedule_delayed_work(&priv->scan_dwork, msecs_to_jiffies(6000));
+		}
+	#endif
 
 	return 0;
 
@@ -4266,6 +4274,15 @@ static int stmmac_hw_init(struct stmmac_priv *priv)
 	return 0;
 }
 
+#ifdef CONFIG_DWMAC_RK_AUTO_DELAYLINE
+static void stmmac_scan_delayline_dwork(struct work_struct *work)
+{
+   struct stmmac_priv *priv = container_of(work, struct stmmac_priv,
+                       scan_dwork.work);
+   dwmac_rk_search_rgmii_delayline(priv);
+};
+#endif
+
 /**
  * stmmac_dvr_probe
  * @device: device pointer
@@ -4458,6 +4475,9 @@ int stmmac_dvr_probe(struct device *device,
 		netdev_warn(priv->dev, "%s: failed debugFS registration\n",
 			    __func__);
 #endif
+	#ifdef CONFIG_DWMAC_RK_AUTO_DELAYLINE
+		INIT_DELAYED_WORK(&priv->scan_dwork, stmmac_scan_delayline_dwork);
+	#endif
 
 	return ret;
 

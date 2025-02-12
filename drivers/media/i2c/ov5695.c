@@ -147,14 +147,14 @@ struct ov5695 {
  * mipi_datarate per lane 840Mbps
  */
 static const struct regval ov5695_global_regs[] = {
-	{0x0103, 0x01},
-	{0x0100, 0x00},
-	{0x0300, 0x04},
+	{0x0103, 0x01},//software reset
+	{0x0100, 0x00},//software standy
+	{0x0300, 0x04},//pll1 pre div =4
 	{0x0301, 0x00},
-	{0x0302, 0x69},
+	{0x0302, 0x69},//pll1_multipilier = 0x69
 	{0x0303, 0x00},
 	{0x0304, 0x00},
-	{0x0305, 0x01},
+	{0x0305, 0x01},//pll1_sys_bitdiv = 0x1
 	{0x0307, 0x00},
 	{0x030b, 0x00},
 	{0x030c, 0x00},
@@ -1392,7 +1392,7 @@ static int ov5695_probe(struct i2c_client *client,
 	dev_info(dev, "driver version: %02x.%02x.%02x",
 		DRIVER_VERSION >> 16,
 		(DRIVER_VERSION & 0xff00) >> 8,
-		DRIVER_VERSION & 0x00ff);
+		DRIVER_VERSION & 0x00ff);//打印sensor驱动的版本
 
 	ov5695 = devm_kzalloc(dev, sizeof(*ov5695), GFP_KERNEL);
 	if (!ov5695)
